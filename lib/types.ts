@@ -27,13 +27,11 @@ export interface Member {
   created_by: string
   first_name: string
   last_name: string
-  dni: string
+  ci: string
   email: string | null
   phone: string | null
-  emergency_contact: string | null
-  emergency_phone: string | null
   notes: string | null
-  status: "active" | "inactive" | "suspended"
+  status: "al_dia" | "vencido" | "inactivo"
   registration_date: string
   membership_expiry: string | null
   created_at: string
@@ -62,10 +60,7 @@ export interface Payment {
   member?: Member
 }
 
-export type MemberStatus = "al_dia" | "vencido" | "inactivo"
-
-export interface MemberWithStatus extends Member {
-  status: MemberStatus
+export interface MemberWithClasses extends Member {
   classes: MemberClass[]
   last_payment?: Payment
   monthly_total: number

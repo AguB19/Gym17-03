@@ -22,7 +22,7 @@ export default async function NuevoPagoPage({ searchParams }: NewPaymentPageProp
       id,
       first_name,
       last_name,
-      dni,
+      ci,
       member_classes (
         id,
         is_active,
@@ -33,7 +33,7 @@ export default async function NuevoPagoPage({ searchParams }: NewPaymentPageProp
         )
       )
     `)
-    .eq("status", "active")
+    .neq("status", "inactivo")
     .order("last_name")
 
   // Calculate monthly total for each member

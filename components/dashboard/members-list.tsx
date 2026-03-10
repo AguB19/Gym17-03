@@ -30,10 +30,10 @@ interface MemberWithStatus {
   id: string
   first_name: string
   last_name: string
-  dni: string
+  ci: string
   email: string | null
   phone: string | null
-  status: "active" | "inactive" | "suspended"
+  status: "al_dia" | "vencido" | "inactivo"
   hasPaidThisMonth: boolean
   monthlyTotal: number
   member_classes: Array<{
@@ -63,7 +63,7 @@ export function MembersList({ members }: MembersListProps) {
     return (
       member.first_name.toLowerCase().includes(searchLower) ||
       member.last_name.toLowerCase().includes(searchLower) ||
-      member.dni.includes(search) ||
+      member.ci.includes(search) ||
       member.email?.toLowerCase().includes(searchLower)
     )
   })
@@ -79,13 +79,33 @@ export function MembersList({ members }: MembersListProps) {
     router.refresh()
   }
 
+  const getStatusBadge = (status: string, hasPaidThisMonth: boolean) => {
+    if (status === "inactivo") {
+      return <Badge variant="secondary">Inactivo</Badge>
+    }
+    if (status === "vencido" || !hasPaidThisMonth) {
+      return (
+        <Badge variant="destructive" className="bg-yellow-500/20 text-yellow-500 border-0">
+          <AlertTriangle className="h-3 w-3 mr-1" />
+          Pendiente
+        </Badge>
+      )
+    }
+    return (
+      <Badge className="bg-primary/20 text-primary border-0">
+        <CheckCircle className="h-3 w-3 mr-1" />
+        Al día
+      </Badge>
+    )
+  }
+
   return (
     <>
       <div className="flex items-center gap-4 mb-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nombre, DNI o email..."
+            placeholder="Buscar por nombre, CI o email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -95,7 +115,7 @@ export function MembersList({ members }: MembersListProps) {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredMembers.map((member) => (
-          <Card key={member.id} className={member.status !== "active" ? "opacity-60" : ""}>
+          <Card key={member.id} className={member.status === "inactivo" ? "opacity-60" : ""}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1 flex-1">
@@ -103,24 +123,9 @@ export function MembersList({ members }: MembersListProps) {
                     <h3 className="font-semibold">
                       {member.last_name}, {member.first_name}
                     </h3>
-                    {member.status !== "active" && (
-                      <Badge variant="secondary">{member.status === "inactive" ? "Inactivo" : "Suspendido"}</Badge>
-                    )}
-                    {member.status === "active" && (
-                      member.hasPaidThisMonth ? (
-                        <Badge className="bg-primary/20 text-primary border-0">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Al día
-                        </Badge>
-                      ) : (
-                        <Badge variant="destructive" className="bg-yellow-500/20 text-yellow-500 border-0">
-                          <AlertTriangle className="h-3 w-3 mr-1" />
-                          Pendiente
-                        </Badge>
-                      )
-                    )}
+                    {getStatusBadge(member.status, member.hasPaidThisMonth)}
                   </div>
-                  <p className="text-sm text-muted-foreground">DNI: {member.dni}</p>
+                  <p className="text-sm text-muted-foreground">CI: {member.ci}</p>
                   {member.email && (
                     <p className="text-sm text-muted-foreground">{member.email}</p>
                   )}
@@ -137,7 +142,7 @@ export function MembersList({ members }: MembersListProps) {
                   )}
                   {member.monthlyTotal > 0 && (
                     <p className="text-sm font-medium text-primary mt-2">
-                      Total mensual: ${member.monthlyTotal.toLocaleString("es-AR")}
+                      Total mensual: ${member.monthlyTotal.toLocaleString("es-UY")}
                     </p>
                   )}
                 </div>
@@ -154,7 +159,7 @@ export function MembersList({ members }: MembersListProps) {
                         Editar
                       </Link>
                     </DropdownMenuItem>
-                    {!member.hasPaidThisMonth && member.status === "active" && (
+                    {!member.hasPaidThisMonth && member.status !== "inactivo" && (
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/pagos/nuevo?socio=${member.id}`}>
                           <CreditCard className="h-4 w-4 mr-2" />

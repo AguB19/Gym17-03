@@ -35,13 +35,11 @@ interface MemberFormProps {
 export function MemberForm({ member, availableClasses }: MemberFormProps) {
   const [firstName, setFirstName] = useState(member?.first_name || "")
   const [lastName, setLastName] = useState(member?.last_name || "")
-  const [dni, setDni] = useState(member?.dni || "")
+  const [ci, setCi] = useState(member?.ci || "")
   const [email, setEmail] = useState(member?.email || "")
-  const [phone, setPhone] = useState(member?.phone || "")
-  const [emergencyContact, setEmergencyContact] = useState(member?.emergency_contact || "")
-  const [emergencyPhone, setEmergencyPhone] = useState(member?.emergency_phone || "")
+  const [phone, setPhone] = useState(member?.phone || "+598 ")
   const [notes, setNotes] = useState(member?.notes || "")
-  const [status, setStatus] = useState<"active" | "inactive" | "suspended">(member?.status || "active")
+  const [status, setStatus] = useState<"al_dia" | "vencido" | "inactivo">(member?.status || "al_dia")
   const [selectedClasses, setSelectedClasses] = useState<string[]>(
     member?.member_classes?.filter(mc => mc.is_active).map(mc => mc.class_id) || []
   )
@@ -63,8 +61,8 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
     setLoading(true)
     setError(null)
 
-    if (!firstName.trim() || !lastName.trim() || !dni.trim()) {
-      setError("Nombre, apellido y DNI son requeridos")
+    if (!firstName.trim() || !lastName.trim() || !ci.trim()) {
+      setError("Nombre, apellido y CI son requeridos")
       setLoading(false)
       return
     }
@@ -79,11 +77,9 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
     const memberData = {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
-      dni: dni.trim(),
+      ci: ci.trim(),
       email: email.trim() || null,
       phone: phone.trim() || null,
-      emergency_contact: emergencyContact.trim() || null,
-      emergency_phone: emergencyPhone.trim() || null,
       notes: notes.trim() || null,
       status,
       updated_at: new Date().toISOString(),
@@ -211,12 +207,12 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor="dni">DNI *</FieldLabel>
+                <FieldLabel htmlFor="ci">CI *</FieldLabel>
                 <Input
-                  id="dni"
-                  placeholder="12345678"
-                  value={dni}
-                  onChange={(e) => setDni(e.target.value)}
+                  id="ci"
+                  placeholder="1.234.567-8"
+                  value={ci}
+                  onChange={(e) => setCi(e.target.value)}
                   required
                 />
               </Field>
@@ -227,9 +223,9 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
                     <SelectValue placeholder="Estado del socio" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Activo</SelectItem>
-                    <SelectItem value="inactive">Inactivo</SelectItem>
-                    <SelectItem value="suspended">Suspendido</SelectItem>
+                    <SelectItem value="al_dia">Al día</SelectItem>
+                    <SelectItem value="vencido">Vencido</SelectItem>
+                    <SelectItem value="inactivo">Inactivo</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -250,30 +246,9 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
                 <FieldLabel htmlFor="phone">Teléfono</FieldLabel>
                 <Input
                   id="phone"
-                  placeholder="+54 11 1234-5678"
+                  placeholder="+598 91234567"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                />
-              </Field>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="emergencyContact">Contacto de emergencia</FieldLabel>
-                <Input
-                  id="emergencyContact"
-                  placeholder="María Pérez"
-                  value={emergencyContact}
-                  onChange={(e) => setEmergencyContact(e.target.value)}
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="emergencyPhone">Teléfono de emergencia</FieldLabel>
-                <Input
-                  id="emergencyPhone"
-                  placeholder="+54 11 9876-5432"
-                  value={emergencyPhone}
-                  onChange={(e) => setEmergencyPhone(e.target.value)}
                 />
               </Field>
             </div>
@@ -298,14 +273,14 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
                         )}
                       </div>
                       <span className="text-sm font-medium text-primary">
-                        ${gymClass.monthly_price.toLocaleString("es-AR")}/mes
+                        ${gymClass.monthly_price.toLocaleString("es-UY")}/mes
                       </span>
                     </label>
                   ))}
                 </div>
                 {selectedClasses.length > 0 && (
                   <p className="text-right font-semibold text-primary mt-3">
-                    Total mensual: ${totalMonthly.toLocaleString("es-AR")}
+                    Total mensual: ${totalMonthly.toLocaleString("es-UY")}
                   </p>
                 )}
               </FieldSet>

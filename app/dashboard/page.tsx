@@ -28,7 +28,7 @@ export default async function DashboardPage() {
   const { count: totalMembers } = await supabase
     .from("members")
     .select("*", { count: "exact", head: true })
-    .eq("status", "active")
+    .neq("status", "inactivo")
 
   const { count: totalClasses } = await supabase
     .from("classes")
@@ -57,7 +57,7 @@ export default async function DashboardPage() {
   const { data: overdueMembers } = await supabase
     .from("members")
     .select("id, first_name, last_name")
-    .eq("status", "active")
+    .neq("status", "inactivo")
     .not("id", "in", paidMemberIds.length > 0 ? `(${paidMemberIds.join(",")})` : "(00000000-0000-0000-0000-000000000000)")
     .limit(5)
 
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
     },
     {
       title: "Ingresos del mes",
-      value: `$${totalRevenue.toLocaleString("es-AR")}`,
+      value: `$${totalRevenue.toLocaleString("es-UY")}`,
       icon: CreditCard,
       href: "/dashboard/pagos",
     },

@@ -30,7 +30,7 @@ interface PaymentWithMember extends Payment {
     id: string
     first_name: string
     last_name: string
-    dni: string
+    ci: string
   } | null
 }
 
@@ -56,7 +56,7 @@ export function PaymentsList({ payments }: PaymentsListProps) {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("es-AR", {
+    return new Date(dateString).toLocaleDateString("es-UY", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -71,7 +71,7 @@ export function PaymentsList({ payments }: PaymentsListProps) {
             <TableRow className="bg-muted/50">
               <TableHead>Fecha</TableHead>
               <TableHead>Socio</TableHead>
-              <TableHead>DNI</TableHead>
+              <TableHead>CI</TableHead>
               <TableHead className="text-right">Monto</TableHead>
               <TableHead>Notas</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -89,10 +89,10 @@ export function PaymentsList({ payments }: PaymentsListProps) {
                     : "Socio eliminado"}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {payment.member?.dni || "-"}
+                  {payment.member?.ci || "-"}
                 </TableCell>
                 <TableCell className="text-right font-semibold text-primary">
-                  ${payment.amount.toLocaleString("es-AR")}
+                  ${payment.amount.toLocaleString("es-UY")}
                 </TableCell>
                 <TableCell className="text-muted-foreground max-w-[200px] truncate">
                   {payment.notes || "-"}

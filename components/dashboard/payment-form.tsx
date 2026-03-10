@@ -21,7 +21,7 @@ interface MemberWithTotal {
   id: string
   first_name: string
   last_name: string
-  dni: string
+  ci: string
   monthlyTotal: number
 }
 
@@ -151,14 +151,14 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
                 <SelectContent>
                   {members.map((member) => (
                     <SelectItem key={member.id} value={member.id}>
-                      {member.last_name}, {member.first_name} - DNI: {member.dni}
+                      {member.last_name}, {member.first_name} - CI: {member.ci}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedMember && selectedMember.monthlyTotal > 0 && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Cuota mensual: ${selectedMember.monthlyTotal.toLocaleString("es-AR")}
+                  Cuota mensual: ${selectedMember.monthlyTotal.toLocaleString("es-UY")}
                 </p>
               )}
             </Field>
