@@ -11,6 +11,7 @@ import {
   Settings,
   Menu,
   X,
+  Bell,
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/dashboard/socios", label: "Socios", icon: Users },
   { href: "/dashboard/clases", label: "Clases", icon: Dumbbell },
   { href: "/dashboard/pagos", label: "Pagos", icon: CreditCard },
+  { href: "/dashboard/notificaciones", label: "Notificaciones", icon: Bell },
   { href: "/dashboard/configuracion", label: "Configuración", icon: Settings },
 ]
 
