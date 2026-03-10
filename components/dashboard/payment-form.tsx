@@ -99,8 +99,8 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
       .from("payments")
       .select("id")
       .eq("member_id", memberId)
-      .eq("period_month", parseInt(periodMonth))
-      .eq("period_year", parseInt(periodYear))
+      .eq("month", parseInt(periodMonth))
+      .eq("year", parseInt(periodYear))
       .single()
 
     if (existingPayment) {
@@ -112,12 +112,12 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
     const { error: insertError } = await supabase
       .from("payments")
       .insert({
-        user_id: user.id,
+        created_by: user.id,
         member_id: memberId,
         amount: amountNum,
         payment_date: paymentDate,
-        period_month: parseInt(periodMonth),
-        period_year: parseInt(periodYear),
+        month: parseInt(periodMonth),
+        year: parseInt(periodYear),
         notes: notes.trim() || null,
       })
 

@@ -19,7 +19,6 @@ export default async function EditClassPage({ params }: EditClassPageProps) {
     .from("classes")
     .select("*")
     .eq("id", id)
-    .eq("user_id", user.id)
     .single()
 
   if (!gymClass) {

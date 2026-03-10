@@ -35,9 +35,8 @@ export default async function PagosPage({ searchParams }: PaymentsPageProps) {
         dni
       )
     `)
-    .eq("user_id", user.id)
-    .eq("period_month", selectedMonth)
-    .eq("period_year", selectedYear)
+    .eq("month", selectedMonth)
+    .eq("year", selectedYear)
     .order("payment_date", { ascending: false })
 
   const totalRevenue = payments?.reduce((sum, p) => sum + p.amount, 0) || 0

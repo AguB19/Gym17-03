@@ -72,7 +72,6 @@ export function ClassForm({ gymClass }: ClassFormProps) {
       const { error } = await supabase
         .from("classes")
         .insert({
-          user_id: user.id,
           name: name.trim(),
           description: description.trim() || null,
           monthly_price: price,

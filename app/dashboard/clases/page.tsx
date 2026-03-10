@@ -17,7 +17,6 @@ export default async function ClasesPage() {
   const { data: classes } = await supabase
     .from("classes")
     .select("*")
-    .eq("user_id", user.id)
     .order("name")
 
   return (

@@ -13,7 +13,6 @@ export default async function NuevoSocioPage() {
   const { data: classes } = await supabase
     .from("classes")
     .select("*")
-    .eq("user_id", user.id)
     .eq("is_active", true)
     .order("name")
 

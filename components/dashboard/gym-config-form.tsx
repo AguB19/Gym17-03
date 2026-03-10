@@ -63,7 +63,7 @@ export function GymConfigForm({ gymConfig }: GymConfigFormProps) {
       const { error } = await supabase
         .from("gym_config")
         .insert({
-          user_id: user.id,
+          owner_id: user.id,
           name: name.trim(),
           address: address.trim() || null,
           phone: phone.trim() || null,

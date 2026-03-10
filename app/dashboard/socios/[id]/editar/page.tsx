@@ -26,7 +26,6 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
       )
     `)
     .eq("id", id)
-    .eq("user_id", user.id)
     .single()
 
   if (!member) {
@@ -36,7 +35,6 @@ export default async function EditMemberPage({ params }: EditMemberPageProps) {
   const { data: classes } = await supabase
     .from("classes")
     .select("*")
-    .eq("user_id", user.id)
     .eq("is_active", true)
     .order("name")
 

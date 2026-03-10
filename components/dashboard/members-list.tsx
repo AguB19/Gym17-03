@@ -33,7 +33,7 @@ interface MemberWithStatus {
   dni: string
   email: string | null
   phone: string | null
-  is_active: boolean
+  status: "active" | "inactive" | "suspended"
   hasPaidThisMonth: boolean
   monthlyTotal: number
   member_classes: Array<{
@@ -95,7 +95,7 @@ export function MembersList({ members }: MembersListProps) {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredMembers.map((member) => (
-          <Card key={member.id} className={!member.is_active ? "opacity-60" : ""}>
+          <Card key={member.id} className={member.status !== "active" ? "opacity-60" : ""}>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1 flex-1">
@@ -103,10 +103,10 @@ export function MembersList({ members }: MembersListProps) {
                     <h3 className="font-semibold">
                       {member.last_name}, {member.first_name}
                     </h3>
-                    {!member.is_active && (
-                      <Badge variant="secondary">Inactivo</Badge>
+                    {member.status !== "active" && (
+                      <Badge variant="secondary">{member.status === "inactive" ? "Inactivo" : "Suspendido"}</Badge>
                     )}
-                    {member.is_active && (
+                    {member.status === "active" && (
                       member.hasPaidThisMonth ? (
                         <Badge className="bg-primary/20 text-primary border-0">
                           <CheckCircle className="h-3 w-3 mr-1" />
@@ -154,7 +154,7 @@ export function MembersList({ members }: MembersListProps) {
                         Editar
                       </Link>
                     </DropdownMenuItem>
-                    {!member.hasPaidThisMonth && member.is_active && (
+                    {!member.hasPaidThisMonth && member.status === "active" && (
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/pagos/nuevo?socio=${member.id}`}>
                           <CreditCard className="h-4 w-4 mr-2" />

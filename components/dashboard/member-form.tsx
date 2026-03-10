@@ -8,8 +8,14 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FieldGroup, Field, FieldLabel, FieldError, FieldSet, FieldLegend } from "@/components/ui/field"
-import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import type { GymClass, Member } from "@/lib/types"
 import { Users } from "lucide-react"
 
@@ -32,12 +38,10 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
   const [dni, setDni] = useState(member?.dni || "")
   const [email, setEmail] = useState(member?.email || "")
   const [phone, setPhone] = useState(member?.phone || "")
-  const [birthDate, setBirthDate] = useState(member?.birth_date || "")
-  const [address, setAddress] = useState(member?.address || "")
   const [emergencyContact, setEmergencyContact] = useState(member?.emergency_contact || "")
   const [emergencyPhone, setEmergencyPhone] = useState(member?.emergency_phone || "")
   const [notes, setNotes] = useState(member?.notes || "")
-  const [isActive, setIsActive] = useState(member?.is_active ?? true)
+  const [status, setStatus] = useState<"active" | "inactive" | "suspended">(member?.status || "active")
   const [selectedClasses, setSelectedClasses] = useState<string[]>(
     member?.member_classes?.filter(mc => mc.is_active).map(mc => mc.class_id) || []
   )
@@ -78,12 +82,10 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
       dni: dni.trim(),
       email: email.trim() || null,
       phone: phone.trim() || null,
-      birth_date: birthDate || null,
-      address: address.trim() || null,
       emergency_contact: emergencyContact.trim() || null,
       emergency_phone: emergencyPhone.trim() || null,
       notes: notes.trim() || null,
-      is_active: isActive,
+      status,
       updated_at: new Date().toISOString(),
     }
 
@@ -122,7 +124,6 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
               .insert({
                 member_id: member.id,
                 class_id: classId,
-                start_date: new Date().toISOString().split("T")[0],
                 is_active: true,
               })
           }
@@ -133,7 +134,8 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
       const { data: newMember, error: insertError } = await supabase
         .from("members")
         .insert({
-          user_id: user.id,
+          created_by: user.id,
+          registration_date: new Date().toISOString().split("T")[0],
           ...memberData,
         })
         .select()
@@ -150,7 +152,6 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
         const memberClassesData = selectedClasses.map(classId => ({
           member_id: newMember.id,
           class_id: classId,
-          start_date: new Date().toISOString().split("T")[0],
           is_active: true,
         }))
 
@@ -220,13 +221,17 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="birthDate">Fecha de nacimiento</FieldLabel>
-                <Input
-                  id="birthDate"
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                />
+                <FieldLabel htmlFor="status">Estado</FieldLabel>
+                <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Estado del socio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Activo</SelectItem>
+                    <SelectItem value="inactive">Inactivo</SelectItem>
+                    <SelectItem value="suspended">Suspendido</SelectItem>
+                  </SelectContent>
+                </Select>
               </Field>
             </div>
 
@@ -251,16 +256,6 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
                 />
               </Field>
             </div>
-
-            <Field>
-              <FieldLabel htmlFor="address">Dirección</FieldLabel>
-              <Input
-                id="address"
-                placeholder="Calle 123, Ciudad"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </Field>
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field>
@@ -324,15 +319,6 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-              />
-            </Field>
-
-            <Field className="flex items-center justify-between">
-              <FieldLabel htmlFor="isActive" className="mb-0">Socio activo</FieldLabel>
-              <Switch
-                id="isActive"
-                checked={isActive}
-                onCheckedChange={setIsActive}
               />
             </Field>
 

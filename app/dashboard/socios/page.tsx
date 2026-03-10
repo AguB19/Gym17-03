@@ -21,7 +21,6 @@ export default async function SociosPage() {
       member_classes (
         id,
         class_id,
-        start_date,
         is_active,
         class:classes (
           id,
@@ -30,7 +29,6 @@ export default async function SociosPage() {
         )
       )
     `)
-    .eq("user_id", user.id)
     .order("last_name")
 
   // Get payments for current month to determine status
@@ -38,9 +36,8 @@ export default async function SociosPage() {
   const { data: currentPayments } = await supabase
     .from("payments")
     .select("member_id")
-    .eq("user_id", user.id)
-    .eq("period_month", now.getMonth() + 1)
-    .eq("period_year", now.getFullYear())
+    .eq("month", now.getMonth() + 1)
+    .eq("year", now.getFullYear())
 
   const paidMemberIds = new Set(currentPayments?.map(p => p.member_id) || [])
 

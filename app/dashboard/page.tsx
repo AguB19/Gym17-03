@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   const { data: gymConfig } = await supabase
     .from("gym_config")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("owner_id", user.id)
     .single()
 
   if (!gymConfig) {
@@ -28,13 +28,11 @@ export default async function DashboardPage() {
   const { count: totalMembers } = await supabase
     .from("members")
     .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .eq("is_active", true)
+    .eq("status", "active")
 
   const { count: totalClasses } = await supabase
     .from("classes")
     .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
     .eq("is_active", true)
 
   // Get current month payments
@@ -42,9 +40,8 @@ export default async function DashboardPage() {
   const { data: currentMonthPayments } = await supabase
     .from("payments")
     .select("amount")
-    .eq("user_id", user.id)
-    .eq("period_month", now.getMonth() + 1)
-    .eq("period_year", now.getFullYear())
+    .eq("month", now.getMonth() + 1)
+    .eq("year", now.getFullYear())
 
   const totalRevenue = currentMonthPayments?.reduce((sum, p) => sum + p.amount, 0) || 0
 
@@ -52,17 +49,15 @@ export default async function DashboardPage() {
   const { data: membersWithPayment } = await supabase
     .from("payments")
     .select("member_id")
-    .eq("user_id", user.id)
-    .eq("period_month", now.getMonth() + 1)
-    .eq("period_year", now.getFullYear())
+    .eq("month", now.getMonth() + 1)
+    .eq("year", now.getFullYear())
 
   const paidMemberIds = membersWithPayment?.map(p => p.member_id) || []
 
   const { data: overdueMembers } = await supabase
     .from("members")
     .select("id, first_name, last_name")
-    .eq("user_id", user.id)
-    .eq("is_active", true)
+    .eq("status", "active")
     .not("id", "in", paidMemberIds.length > 0 ? `(${paidMemberIds.join(",")})` : "(00000000-0000-0000-0000-000000000000)")
     .limit(5)
 
