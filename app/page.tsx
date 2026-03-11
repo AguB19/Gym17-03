@@ -6,10 +6,12 @@ import { Dumbbell, Users, CreditCard, BarChart3 } from "lucide-react"
 
 export default async function HomePage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (user) {
-    redirect("/dashboard")
+  
+  if (supabase) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      redirect("/dashboard")
+    }
   }
 
   const features = [
