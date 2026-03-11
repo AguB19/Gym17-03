@@ -24,6 +24,12 @@ export default function RegistroPage() {
     setLoading(true)
     setError(null)
 
+    if (!supabase) {
+      setError("Supabase no está configurado. Por favor, configure las variables de entorno.")
+      setLoading(false)
+      return
+    }
+
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden")
       setLoading(false)
