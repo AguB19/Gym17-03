@@ -11,7 +11,7 @@ import { FieldGroup, Field, FieldLabel, FieldError } from "@/components/ui/field
 import { Dumbbell } from "lucide-react"
 
 export default function RegistroPage() {
-  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("+598 ")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -25,7 +25,14 @@ export default function RegistroPage() {
     setError(null)
 
     if (!supabase) {
-      setError("Supabase no está configurado. Por favor, configure las variables de entorno.")
+      setError("Error de conexión. Por favor, recarga la página.")
+      setLoading(false)
+      return
+    }
+
+    const cleanPhone = phone.replace(/\s/g, "")
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setError("Por favor ingresa un número de celular válido")
       setLoading(false)
       return
     }
@@ -42,22 +49,41 @@ export default function RegistroPage() {
       return
     }
 
-    const { error } = await supabase.auth.signUp({
-      email,
+    // Sign up with phone - no email verification needed
+    const { error: signUpError } = await supabase.auth.signUp({
+      phone: cleanPhone,
       password,
       options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-          `${window.location.origin}/dashboard`,
+        data: {
+          phone: cleanPhone,
+        },
       },
     })
 
-    if (error) {
-      setError(error.message)
+    if (signUpError) {
+      if (signUpError.message.includes("already registered")) {
+        setError("Este número ya está registrado. Intenta iniciar sesión.")
+      } else {
+        setError(signUpError.message)
+      }
       setLoading(false)
       return
     }
 
-    router.push("/auth/registro-exitoso")
+    // Auto login after signup
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      phone: cleanPhone,
+      password,
+    })
+
+    if (signInError) {
+      // If auto-login fails, redirect to login page
+      router.push("/auth/login")
+      return
+    }
+
+    router.push("/dashboard")
+    router.refresh()
   }
 
   return (
@@ -76,13 +102,13 @@ export default function RegistroPage() {
           <form onSubmit={handleRegister}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
+                <FieldLabel htmlFor="phone">Número de celular</FieldLabel>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@gimnasio.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="phone"
+                  type="tel"
+                  placeholder="+598 91234567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   required
                 />
               </Field>

@@ -79,11 +79,23 @@ export function MembersList({ members }: MembersListProps) {
     router.refresh()
   }
 
-  const getStatusBadge = (status: string, hasPaidThisMonth: boolean) => {
-    if (status === "inactivo") {
+  const getStatusBadge = (member: MemberWithStatus) => {
+    if (member.status === "inactivo") {
       return <Badge variant="secondary">Inactivo</Badge>
     }
-    if (status === "vencido" || !hasPaidThisMonth) {
+    
+    // If member has no classes, they're considered "al_dia" (nothing to pay)
+    const hasActiveClasses = member.member_classes?.some(mc => mc.is_active && mc.class)
+    
+    if (!hasActiveClasses) {
+      return (
+        <Badge className="bg-muted text-muted-foreground border-0">
+          Sin clases
+        </Badge>
+      )
+    }
+    
+    if (member.status === "vencido" || !member.hasPaidThisMonth) {
       return (
         <Badge variant="destructive" className="bg-yellow-500/20 text-yellow-500 border-0">
           <AlertTriangle className="h-3 w-3 mr-1" />
@@ -123,7 +135,7 @@ export function MembersList({ members }: MembersListProps) {
                     <h3 className="font-semibold">
                       {member.last_name}, {member.first_name}
                     </h3>
-                    {getStatusBadge(member.status, member.hasPaidThisMonth)}
+                    {getStatusBadge(member)}
                   </div>
                   <p className="text-sm text-muted-foreground">CI: {member.ci}</p>
                   {member.email && (

@@ -74,6 +74,12 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
     setLoading(true)
     setError(null)
 
+    if (!supabase) {
+      setError("Error de conexión con la base de datos")
+      setLoading(false)
+      return
+    }
+
     if (!memberId) {
       setError("Selecciona un socio")
       setLoading(false)

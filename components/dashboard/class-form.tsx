@@ -44,6 +44,12 @@ export function ClassForm({ gymClass }: ClassFormProps) {
       return
     }
 
+    if (!supabase) {
+      setError("Error de conexión con la base de datos")
+      setLoading(false)
+      return
+    }
+
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       setError("No estás autenticado")
@@ -72,6 +78,7 @@ export function ClassForm({ gymClass }: ClassFormProps) {
       const { error } = await supabase
         .from("classes")
         .insert({
+          created_by: user.id,
           name: name.trim(),
           description: description.trim() || null,
           monthly_price: price,
