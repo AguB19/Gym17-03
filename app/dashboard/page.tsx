@@ -5,8 +5,15 @@ import { Users, Dumbbell, CreditCard, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
+export const dynamic = "force-dynamic"
+
 export default async function DashboardPage() {
   const supabase = await createClient()
+  
+  if (!supabase) {
+    redirect("/auth/login")
+  }
+  
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {

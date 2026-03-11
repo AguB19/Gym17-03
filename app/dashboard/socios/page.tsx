@@ -6,8 +6,15 @@ import { Plus, Users } from "lucide-react"
 import Link from "next/link"
 import { MembersList } from "@/components/dashboard/members-list"
 
+export const dynamic = "force-dynamic"
+
 export default async function SociosPage() {
   const supabase = await createClient()
+  
+  if (!supabase) {
+    redirect("/auth/login")
+  }
+  
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {

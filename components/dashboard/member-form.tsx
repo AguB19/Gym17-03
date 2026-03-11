@@ -61,6 +61,12 @@ export function MemberForm({ member, availableClasses }: MemberFormProps) {
     setLoading(true)
     setError(null)
 
+    if (!supabase) {
+      setError("Error de conexión con la base de datos")
+      setLoading(false)
+      return
+    }
+
     if (!firstName.trim() || !lastName.trim() || !ci.trim()) {
       setError("Nombre, apellido y CI son requeridos")
       setLoading(false)

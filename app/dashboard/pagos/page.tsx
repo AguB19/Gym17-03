@@ -7,6 +7,9 @@ import Link from "next/link"
 import { PaymentsList } from "@/components/dashboard/payments-list"
 import { PaymentFilters } from "@/components/dashboard/payment-filters"
 
+// Force dynamic to always get fresh data
+export const dynamic = "force-dynamic"
+
 interface PaymentsPageProps {
   searchParams: Promise<{ mes?: string; anio?: string }>
 }
@@ -14,6 +17,11 @@ interface PaymentsPageProps {
 export default async function PagosPage({ searchParams }: PaymentsPageProps) {
   const params = await searchParams
   const supabase = await createClient()
+  
+  if (!supabase) {
+    redirect("/auth/login")
+  }
+  
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -32,14 +40,14 @@ export default async function PagosPage({ searchParams }: PaymentsPageProps) {
         id,
         first_name,
         last_name,
-        dni
+        ci
       )
     `)
     .eq("month", selectedMonth)
     .eq("year", selectedYear)
     .order("payment_date", { ascending: false })
 
-  const totalRevenue = payments?.reduce((sum, p) => sum + p.amount, 0) || 0
+  const totalRevenue = payments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
 
   return (
     <div className="space-y-6">

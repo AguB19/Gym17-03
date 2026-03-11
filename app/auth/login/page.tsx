@@ -11,7 +11,7 @@ import { FieldGroup, Field, FieldLabel, FieldError } from "@/components/ui/field
 import { Dumbbell } from "lucide-react"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("+598 ")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -23,13 +23,30 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
+    if (!supabase) {
+      setError("Error de conexión. Por favor, recarga la página.")
+      setLoading(false)
+      return
+    }
+
+    const cleanPhone = phone.replace(/\s/g, "")
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setError("Por favor ingresa un número de celular válido")
+      setLoading(false)
+      return
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      phone: cleanPhone,
       password,
     })
 
     if (error) {
-      setError(error.message)
+      if (error.message.includes("Invalid login")) {
+        setError("Celular o contraseña incorrectos")
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
       return
     }
@@ -54,13 +71,13 @@ export default function LoginPage() {
           <form onSubmit={handleLogin}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
+                <FieldLabel htmlFor="phone">Número de celular</FieldLabel>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@gimnasio.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="phone"
+                  type="tel"
+                  placeholder="+598 91234567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   required
                 />
               </Field>
