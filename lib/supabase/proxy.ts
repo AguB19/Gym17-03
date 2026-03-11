@@ -8,7 +8,6 @@ export async function updateSession(request: NextRequest) {
 
   // Check if Supabase credentials are configured
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.warn('[v0] Supabase credentials not configured. Skipping auth middleware.')
     return supabaseResponse
   }
 
