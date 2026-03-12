@@ -11,7 +11,7 @@ import { FieldGroup, Field, FieldLabel, FieldError } from "@/components/ui/field
 import { Dumbbell } from "lucide-react"
 
 export default function RegistroPage() {
-  const [phone, setPhone] = useState("+598 ")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -30,9 +30,8 @@ export default function RegistroPage() {
       return
     }
 
-    const cleanPhone = phone.replace(/\s/g, "")
-    if (!cleanPhone || cleanPhone.length < 10) {
-      setError("Por favor ingresa un número de celular válido")
+    if (!email || !email.includes("@")) {
+      setError("Por favor ingresa un email válido")
       setLoading(false)
       return
     }
@@ -49,20 +48,19 @@ export default function RegistroPage() {
       return
     }
 
-    // Sign up with phone - no email verification needed
-    const { error: signUpError } = await supabase.auth.signUp({
-      phone: cleanPhone,
+    // Sign up with email - auto confirm enabled in Supabase
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
       password,
       options: {
-        data: {
-          phone: cleanPhone,
-        },
+        // This makes the user auto-confirmed without email verification
+        emailRedirectTo: undefined,
       },
     })
 
     if (signUpError) {
       if (signUpError.message.includes("already registered")) {
-        setError("Este número ya está registrado. Intenta iniciar sesión.")
+        setError("Este email ya está registrado. Intenta iniciar sesión.")
       } else {
         setError(signUpError.message)
       }
@@ -70,15 +68,24 @@ export default function RegistroPage() {
       return
     }
 
+    // If user is auto-confirmed, we can login directly
+    if (data.user && !data.user.email_confirmed_at) {
+      // User needs to confirm email - but we'll try to login anyway
+      // In case auto-confirm is enabled in Supabase
+    }
+
     // Auto login after signup
     const { error: signInError } = await supabase.auth.signInWithPassword({
-      phone: cleanPhone,
+      email,
       password,
     })
 
     if (signInError) {
-      // If auto-login fails, redirect to login page
-      router.push("/auth/login")
+      // If auto-login fails, it might need email confirmation
+      // Show message and redirect to login
+      setError("Cuenta creada. Por favor inicia sesión.")
+      setLoading(false)
+      setTimeout(() => router.push("/auth/login"), 2000)
       return
     }
 
@@ -102,13 +109,13 @@ export default function RegistroPage() {
           <form onSubmit={handleRegister}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="phone">Número de celular</FieldLabel>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+598 91234567"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="tu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </Field>

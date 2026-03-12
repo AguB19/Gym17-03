@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CreditCard } from "lucide-react"
+import { CreditCard, Search, X, ChevronDown } from "lucide-react"
 
 interface MemberWithTotal {
   id: string
@@ -45,6 +45,139 @@ const months = [
   { value: "12", label: "Diciembre" },
 ]
 
+function MemberSearchSelect({
+  members,
+  value,
+  onChange,
+}: {
+  members: MemberWithTotal[]
+  value: string
+  onChange: (id: string) => void
+}) {
+  const [query, setQuery] = useState("")
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const selected = members.find((m) => m.id === value)
+
+  const filtered = query.trim()
+    ? members.filter((m) => {
+        const full = `${m.first_name} ${m.last_name} ${m.ci}`.toLowerCase()
+        return full.includes(query.toLowerCase())
+      })
+    : members
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+        setQuery("")
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const handleSelect = (id: string) => {
+    onChange(id)
+    setOpen(false)
+    setQuery("")
+  }
+
+  const handleClear = () => {
+    onChange("")
+    setQuery("")
+    setOpen(false)
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      {/* Trigger button */}
+      <button
+        type="button"
+        onClick={() => {
+          setOpen((prev) => !prev)
+          setTimeout(() => inputRef.current?.focus(), 50)
+        }}
+        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      >
+        <span className={selected ? "text-foreground" : "text-muted-foreground"}>
+          {selected
+            ? `${selected.last_name}, ${selected.first_name} — CI: ${selected.ci}`
+            : "Buscar socio..."}
+        </span>
+        <div className="flex items-center gap-1">
+          {selected && (
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={(e) => { e.stopPropagation(); handleClear() }}
+              onKeyDown={(e) => e.key === "Enter" && handleClear()}
+              className="rounded p-0.5 hover:bg-muted"
+            >
+              <X className="h-3.5 w-3.5 text-muted-foreground" />
+            </span>
+          )}
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg">
+          {/* Search input */}
+          <div className="flex items-center gap-2 border-b px-3 py-2">
+            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Nombre, apellido o CI..."
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            />
+            {query && (
+              <button type="button" onClick={() => setQuery("")}>
+                <X className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* List */}
+          <ul className="max-h-56 overflow-y-auto py-1">
+            {filtered.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-muted-foreground">
+                No se encontraron socios
+              </li>
+            ) : (
+              filtered.map((member) => (
+                <li
+                  key={member.id}
+                  onClick={() => handleSelect(member.id)}
+                  className={`cursor-pointer px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground flex justify-between items-center gap-2 ${
+                    member.id === value ? "bg-accent/50 font-medium" : ""
+                  }`}
+                >
+                  <span>
+                    {member.last_name}, {member.first_name}
+                    <span className="ml-2 text-muted-foreground text-xs">CI: {member.ci}</span>
+                  </span>
+                  {member.monthlyTotal > 0 && (
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      ${member.monthlyTotal.toLocaleString("es-UY")}
+                    </span>
+                  )}
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) {
   const now = new Date()
   const [memberId, setMemberId] = useState(preselectedMemberId || "")
@@ -62,7 +195,6 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
   const currentYear = now.getFullYear()
   const years = Array.from({ length: 3 }, (_, i) => currentYear - i + 1)
 
-  // Auto-fill amount when member is selected
   useEffect(() => {
     if (selectedMember && selectedMember.monthlyTotal > 0) {
       setAmount(selectedMember.monthlyTotal.toString())
@@ -100,7 +232,6 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
       return
     }
 
-    // Check if payment already exists for this member/period
     const { data: existingPayment } = await supabase
       .from("payments")
       .select("id")
@@ -149,19 +280,12 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
         <form onSubmit={handleSubmit}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="member">Socio *</FieldLabel>
-              <Select value={memberId} onValueChange={setMemberId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona un socio" />
-                </SelectTrigger>
-                <SelectContent>
-                  {members.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      {member.last_name}, {member.first_name} - CI: {member.ci}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FieldLabel>Socio *</FieldLabel>
+              <MemberSearchSelect
+                members={members}
+                value={memberId}
+                onChange={setMemberId}
+              />
               {selectedMember && selectedMember.monthlyTotal > 0 && (
                 <p className="text-sm text-muted-foreground mt-1">
                   Cuota mensual: ${selectedMember.monthlyTotal.toLocaleString("es-UY")}
@@ -171,7 +295,7 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor="periodMonth">Mes del período *</FieldLabel>
+                <FieldLabel>Mes del período *</FieldLabel>
                 <Select value={periodMonth} onValueChange={setPeriodMonth}>
                   <SelectTrigger>
                     <SelectValue placeholder="Mes" />
@@ -186,7 +310,7 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
                 </Select>
               </Field>
               <Field>
-                <FieldLabel htmlFor="periodYear">Año del período *</FieldLabel>
+                <FieldLabel>Año del período *</FieldLabel>
                 <Select value={periodYear} onValueChange={setPeriodYear}>
                   <SelectTrigger>
                     <SelectValue placeholder="Año" />
@@ -204,9 +328,8 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
 
             <div className="grid gap-4 md:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor="amount">Monto ($) *</FieldLabel>
+                <FieldLabel>Monto ($) *</FieldLabel>
                 <Input
-                  id="amount"
                   type="number"
                   min="0"
                   step="0.01"
@@ -217,9 +340,8 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="paymentDate">Fecha de pago *</FieldLabel>
+                <FieldLabel>Fecha de pago *</FieldLabel>
                 <Input
-                  id="paymentDate"
                   type="date"
                   value={paymentDate}
                   onChange={(e) => setPaymentDate(e.target.value)}
@@ -229,9 +351,8 @@ export function PaymentForm({ members, preselectedMemberId }: PaymentFormProps) 
             </div>
 
             <Field>
-              <FieldLabel htmlFor="notes">Notas</FieldLabel>
+              <FieldLabel>Notas</FieldLabel>
               <Textarea
-                id="notes"
                 placeholder="Notas adicionales sobre el pago..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

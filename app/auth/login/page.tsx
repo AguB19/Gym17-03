@@ -11,7 +11,7 @@ import { FieldGroup, Field, FieldLabel, FieldError } from "@/components/ui/field
 import { Dumbbell } from "lucide-react"
 
 export default function LoginPage() {
-  const [phone, setPhone] = useState("+598 ")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -29,21 +29,22 @@ export default function LoginPage() {
       return
     }
 
-    const cleanPhone = phone.replace(/\s/g, "")
-    if (!cleanPhone || cleanPhone.length < 10) {
-      setError("Por favor ingresa un número de celular válido")
+    if (!email || !email.includes("@")) {
+      setError("Por favor ingresa un email válido")
       setLoading(false)
       return
     }
 
     const { error } = await supabase.auth.signInWithPassword({
-      phone: cleanPhone,
+      email,
       password,
     })
 
     if (error) {
       if (error.message.includes("Invalid login")) {
-        setError("Celular o contraseña incorrectos")
+        setError("Email o contraseña incorrectos")
+      } else if (error.message.includes("Email not confirmed")) {
+        setError("Por favor confirma tu email antes de iniciar sesión")
       } else {
         setError(error.message)
       }
@@ -71,13 +72,13 @@ export default function LoginPage() {
           <form onSubmit={handleLogin}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="phone">Número de celular</FieldLabel>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+598 91234567"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="tu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </Field>
