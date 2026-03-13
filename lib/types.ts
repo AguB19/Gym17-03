@@ -7,8 +7,29 @@ export interface GymConfig {
   email: string | null
   logo_url: string | null
   schedule: string | null
+  is_active: boolean
   created_at: string
   updated_at: string
+}
+
+export interface SuperAdmin {
+  id: string
+  user_id: string
+  email: string
+  created_at: string
+}
+
+export interface WhatsAppNotification {
+  id: string
+  gym_id: string
+  member_id: string
+  phone: string
+  message: string
+  notification_type: 'reminder' | 'overdue'
+  status: 'sent' | 'failed' | 'pending'
+  error_message: string | null
+  sent_at: string
+  created_at: string
 }
 
 export interface GymClass {
