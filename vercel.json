@@ -1,7 +1,11 @@
 {
   "crons": [
     {
-      "path": "/api/cron/check-overdue-payments",
+      "path": "/api/send-notifications",
+      "schedule": "0 9 5 * *"
+    },
+    {
+      "path": "/api/send-notifications",
       "schedule": "0 9 10 * *"
     }
   ]
