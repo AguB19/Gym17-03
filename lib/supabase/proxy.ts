@@ -84,8 +84,8 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Protect super-admin routes - only allow super admins
-  if (user && request.nextUrl.pathname.startsWith('/super-admin')) {
+  // Protect super-admin routes - only allow super admins (except login page)
+  if (user && request.nextUrl.pathname.startsWith('/super-admin') && request.nextUrl.pathname !== '/super-admin/login') {
     const { data: superAdmin } = await supabase
       .from('super_admins')
       .select('id')
@@ -97,11 +97,6 @@ export async function updateSession(request: NextRequest) {
       url.pathname = '/dashboard'
       return NextResponse.redirect(url)
     }
-  }
-
-  // Redirect super admin login to super admin dashboard
-  if (request.nextUrl.pathname === '/super-admin/login' && !user) {
-    // Allow access to super admin login page
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
