@@ -41,10 +41,18 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
     
-    // Formatear el número si no tiene el prefijo de WhatsApp
-    const formattedPhone = phone.startsWith("whatsapp:") ? phone : `whatsapp:+${phone.replace(/\D/g, "")}`
+    // Formatear el número - quitar caracteres no numéricos y agregar + si no lo tiene
+    const cleanPhone = phone.replace(/\D/g, "")
+    const formattedPhone = `+${cleanPhone}`
     
-    const result = await sendWhatsAppMessage(formattedPhone, message)
+    const result = await sendWhatsAppMessage({ to: formattedPhone, message })
+    
+    if (!result.success) {
+      return NextResponse.json({
+        success: false,
+        error: result.error
+      }, { status: 500 })
+    }
     
     return NextResponse.json({
       success: true,
