@@ -9,6 +9,8 @@ import {
   Menu,
   X,
   Shield,
+  Bell,
+  MessageSquare,
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -16,6 +18,8 @@ import { Button } from "@/components/ui/button"
 const navItems = [
   { href: "/super-admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/super-admin/gimnasios", label: "Gimnasios", icon: Building2 },
+  { href: "/super-admin/notifications", label: "Notificaciones", icon: Bell },
+  { href: "/super-admin/test-whatsapp", label: "Probar WhatsApp", icon: MessageSquare },
 ]
 
 export function SuperAdminSidebar() {
