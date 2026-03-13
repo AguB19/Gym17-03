@@ -57,6 +57,53 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Check if user is logged in and trying to access dashboard
+  if (user && request.nextUrl.pathname.startsWith('/dashboard')) {
+    // First check if user is a super admin (they always have access)
+    const { data: superAdmin } = await supabase
+      .from('super_admins')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    // Super admins bypass gym activation check
+    if (!superAdmin) {
+      // Check if user's gym is active
+      const { data: gymConfig } = await supabase
+        .from('gym_config')
+        .select('is_active')
+        .eq('owner_id', user.id)
+        .single()
+
+      // If gym exists and is inactive, redirect to inactive page
+      if (gymConfig && gymConfig.is_active === false) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/gym-inactive'
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+
+  // Protect super-admin routes - only allow super admins
+  if (user && request.nextUrl.pathname.startsWith('/super-admin')) {
+    const { data: superAdmin } = await supabase
+      .from('super_admins')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!superAdmin) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Redirect super admin login to super admin dashboard
+  if (request.nextUrl.pathname === '/super-admin/login' && !user) {
+    // Allow access to super admin login page
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

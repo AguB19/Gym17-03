@@ -4,21 +4,20 @@
 -- =============================================================================
 
 -- =============================================================================
--- 1. CLEANUP - Drop existing objects safely
+-- 1. CLEANUP - Drop existing objects safely (tables first, then functions)
 -- =============================================================================
-DROP TRIGGER IF EXISTS trigger_update_member_status ON members;
-DROP TRIGGER IF EXISTS trigger_update_member_after_payment ON payments;
+DROP TABLE IF EXISTS public.whatsapp_notifications CASCADE;
+DROP TABLE IF EXISTS public.notifications CASCADE;
+DROP TABLE IF EXISTS public.payments CASCADE;
+DROP TABLE IF EXISTS public.member_classes CASCADE;
+DROP TABLE IF EXISTS public.classes CASCADE;
+DROP TABLE IF EXISTS public.members CASCADE;
+DROP TABLE IF EXISTS public.super_admins CASCADE;
+DROP TABLE IF EXISTS public.gym_config CASCADE;
+DROP TABLE IF EXISTS public.fees CASCADE;
+
 DROP FUNCTION IF EXISTS update_member_status() CASCADE;
 DROP FUNCTION IF EXISTS update_member_after_payment() CASCADE;
-
-DROP TABLE IF EXISTS notifications CASCADE;
-DROP TABLE IF EXISTS payments CASCADE;
-DROP TABLE IF EXISTS member_classes CASCADE;
-DROP TABLE IF EXISTS classes CASCADE;
-DROP TABLE IF EXISTS members CASCADE;
-DROP TABLE IF EXISTS super_admins CASCADE;
-DROP TABLE IF EXISTS gym_config CASCADE;
-DROP TABLE IF EXISTS fees CASCADE;
 
 DROP TYPE IF EXISTS membership_status CASCADE;
 DROP TYPE IF EXISTS fee_type CASCADE;
