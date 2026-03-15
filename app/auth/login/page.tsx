@@ -35,19 +35,33 @@ export default function LoginPage() {
       return
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) {
-      if (error.message.includes("Invalid login")) {
+    if (authError) {
+      if (authError.message.includes("Invalid login")) {
         setError("Email o contraseña incorrectos")
-      } else if (error.message.includes("Email not confirmed")) {
+      } else if (authError.message.includes("Email not confirmed")) {
         setError("Por favor confirma tu email antes de iniciar sesión")
       } else {
-        setError(error.message)
+        setError(authError.message)
       }
+      setLoading(false)
+      return
+    }
+
+    // 🔎 Verificar estado del gimnasio
+    const { data: gymConfig, error: gymError } = await supabase
+      .from("gym_config")
+      .select("is_active")
+      .eq("owner_id", authData.user.id)
+      .single()
+
+    if (gymError || !gymConfig || !gymConfig.is_active) {
+      await supabase.auth.signOut()
+      setError("Acceso denegado.")
       setLoading(false)
       return
     }
@@ -93,12 +107,15 @@ export default function LoginPage() {
                   required
                 />
               </Field>
+
               {error && <FieldError>{error}</FieldError>}
+
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Iniciando sesión..." : "Iniciar sesión"}
               </Button>
             </FieldGroup>
           </form>
+
           <p className="text-center text-sm text-muted-foreground mt-4">
             ¿No tienes cuenta?{" "}
             <Link href="/auth/registro" className="text-primary hover:underline">
