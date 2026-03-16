@@ -10,7 +10,7 @@ import { sendWhatsAppMessage } from "@/lib/twilio"
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    
+
     // Verificar que el usuario es super admin
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -43,7 +43,9 @@ export async function POST(request: NextRequest) {
     
     // Formatear el número - quitar caracteres no numéricos y agregar + si no lo tiene
     const cleanPhone = phone.replace(/\D/g, "")
-    const formattedPhone = `+${cleanPhone}`
+    const formattedPhone = cleanPhone.startsWith("0")
+      ? "+598" + cleanPhone.slice(1)
+      : "+" + cleanPhone
     
     const result = await sendWhatsAppMessage({ to: formattedPhone, message })
     

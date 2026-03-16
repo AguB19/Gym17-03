@@ -18,7 +18,7 @@ export async function GET() {
     const day = today.getDate()
 
     // Solo ejecutar el día 10 o el día 5 (5 días antes del 10)
-    if (day !== 10 && day !== 5) {
+    if (day !== 16 && day !== 5) {
       return NextResponse.json({ message: 'No es día de notificaciones' })
     }
 
@@ -37,15 +37,20 @@ export async function GET() {
 
       if (day === 5) {
         message = `Hola ${member.first_name}! ⚠️ Tu cuota vence el día 10. Recordá ponerte al día para seguir entrenando.`
-      } else if (day === 10) {
+      } else if (day === 16) {
         message = `Hola ${member.first_name}! ⚠️ Tu cuota está vencida. Contactate con el gimnasio para regularizar tu situación.`
       }
 
-      const result = await twilioClient.messages.create({
-        from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-        to: `whatsapp:${member.phone}`,
-        body: message
-      })
+        const rawPhone = member.phone.replace(/\D/g, "")
+        const formattedPhone = rawPhone.startsWith("0")
+          ? "+598" + rawPhone.slice(1)
+          : "+" + rawPhone
+
+        const result = await twilioClient.messages.create({
+          from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+          to: `whatsapp:${formattedPhone}`,
+          body: message
+        })
 
       results.push({ member: member.first_name, sid: result.sid })
     }
@@ -55,6 +60,7 @@ export async function GET() {
       sent: results.length,
       results
     })
+
 
   } catch (error) {
     console.error('Error enviando notificaciones:', error)
