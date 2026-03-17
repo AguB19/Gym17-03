@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   console.log(`[Cron] Running WhatsApp notifications for day ${dayOfMonth}`)
 
   // Only run on day 5 (reminder) or day 10 (overdue)
-  if (dayOfMonth !== 5 && dayOfMonth !== 10) {
+  if (dayOfMonth !== 5 && dayOfMonth !== 16) {
     console.log('[Cron] Not a notification day, skipping')
     return NextResponse.json({ 
       message: 'Not a notification day',
@@ -70,11 +70,11 @@ export async function GET(request: Request) {
     console.log(`[Cron] Found ${members.length} members to notify`)
 
     // Determine message based on day
-    const messageTemplate = dayOfMonth === 5
+    const messageTemplate = dayOfMonth === 16
       ? (name: string) => `Hola ${name}! ⚠️ Tu cuota vence el día 10. Recordá ponerte al día para seguir entrenando.`
       : (name: string) => `Hola ${name}! ⚠️ Tu cuota está vencida. Contactate con el gimnasio para regularizar tu situación.`
 
-    const notificationType = dayOfMonth === 5 ? 'payment_reminder' : 'payment_overdue'
+    const notificationType = dayOfMonth === 16 ? 'payment_reminder' : 'payment_overdue'
 
     // Send messages and track results
     const results = {
