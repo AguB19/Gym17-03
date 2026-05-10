@@ -6,7 +6,8 @@
     },
     {
       "path": "/api/cron/whatsapp-notifications",
-      "schedule": "0 9 10 * *"
+      "schedule": "*/5 * * * *"
+      
     }
   ]
 }
