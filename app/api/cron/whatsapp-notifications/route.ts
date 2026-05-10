@@ -7,12 +7,25 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 export async function GET(request: Request) {
+  const cronHeader = request.headers.get('x-vercel-cron')
+
+  if (cronHeader !== '1') {
+    console.log('[Cron] Unauthorized request')
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  console.log('[Cron] Authorized request')
+
+  return NextResponse.json({ success: true })
+}
+/*
+export async function GET(request: Request) {
   // Verify the request is from Vercel Cron
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     console.log('[Cron] Unauthorized request')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  }*/
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey)
   
